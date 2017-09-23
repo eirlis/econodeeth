@@ -4,7 +4,7 @@ import "./TrashToken.sol";
 
 contract MetalToken is TrashToken {
 
-	function MetalToken(string _name, string _symbol, uint8 _decimals, string _measurements, bool _danger)
+	function MetalToken()
     TrashToken("MetalToken", "MT", 3, "kilo", false) {
 
     }
