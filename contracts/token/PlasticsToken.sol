@@ -5,7 +5,7 @@ import "./TrashToken.sol";
 contract PlasticsToken is TrashToken {
 
 	function PlasticsToken()
-    TrashToken("PlasticsToken", "PT", 3, "kilo", false) {
+    TrashToken("PlasticsToken", "PlT", 3, "kilo", false) {
 
     }
 

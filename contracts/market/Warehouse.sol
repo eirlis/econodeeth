@@ -1,18 +1,123 @@
 pragma solidity ^0.4.11;
 
 import "../ownership/Owned.sol";
+import "../ownership/Destroyable.sol";
 import "../storage/DataStorage.sol";
 import "../storage/TrashRequestDAO.sol";
 import "../token/TrashToken.sol";
+import "../Dispatcher.sol";
 
 
-contract Warehouse is Owned {
+contract Warehouse is Owned, Destroyable {
 
-	using TrashRequestDAO for address;
+	event BuyTrashEvent(uint256 index, bytes32 hash, uint timestamp, address sender, 
+		address receiver, uint256 amount, string tokenType);
+
+	event TrashEventError(uint when, address sender, address receiver, string tokenType);
+
+	event RemoveTrashEvent(uint256 index, bytes32 hash,  uint timestamp, address sender, 
+		address receiver, uint256 amount, string tokenType);
+
+	event DealCompleted(uint time, address from, address to, uint256 amount, string tokenType);
+
+    event DealError(uint time, address from, address to, uint256 amount, string tokenType);
+
+    event RemoveError(uint time, address from, address to, uint256 amount, string tokenType);
+
+    event DealCanceledBySender(uint time, address from, address to, uint256 amount, string tokenType);
+
+    event DealCanceledByReceiver(uint time, address from, address to, uint256 amount, string tokenType);
 
 	
+	using TrashRequestDAO for address;
 
-	function Warehouse (ctorArgs) {
-		
-	}	
+	Dispatcher public dispatcher;
+
+	mapping (address => mapping (string => int)) pricings;
+
+	mapping (address => mapping (string => bool)) isAvailable;
+	
+
+	function Warehouse (address dispatcherAddress) {
+		setDispatcher(dispatcherAddress);
+	}
+
+	function setDispatcher(address dispatcherAddress) onlyOwner {
+        if (dispatcherAddress == 0x0) throw;
+        dispatcher = Dispatcher(dispatcherAddress);
+    }
+
+    function createTrash(address receiver, uint256 trashAmount, string tokenType) {
+    	if(receiver == 0x0) throw;
+    	if(trashAmount == 0) throw;
+    	TrashToken token;
+    	if(tokenType == "GT") {
+    		token = TrashToken(dispatcher.getContract("GlassToken");
+    	} else if(tokenType == "BT") {
+    		token = TrashToken(dispatcher.getContract("BatteriesToken");
+    	} else if(tokenType == "CT") {
+    		token = TrashToken(dispatcher.getContract("CeramicsToken");
+    	} else if(tokenType == "ChT") {
+    		token = TrashToken(dispatcher.getContract("ChemicalsToken");
+    	} else if(tokenType == "MT") {
+    		token = TrashToken(dispatcher.getContract("MetalToken");
+    	} else if(tokenType == "MxT") {
+    		token = TrashToken(dispatcher.getContract("MixedToken");
+    	} else if(tokenType == "OT") {
+    		token = TrashToken(dispatcher.getContract("OrganicalToken");
+    	} else if(tokenType == "PT") {
+    		token = TrashToken(dispatcher.getContract("PaperToken");
+    	} else if(tokenType == "PlT") {
+    		token = TrashToken(dispatcher.getContract("PlasticToken");
+    	} else if(tokenType == "TT") {
+    		token = TrashToken(dispatcher.getContract("TextilesToken");
+    	}
+
+
+    	//TODO: update event params
+    	if(token.transferFrom(msg.sender, address(this), amount))) {
+    		var (success, fromIndex, hash) = dispatcher.getContract("DataStorage")
+    		.addTrashRequest(now, msg.sender, receiver, trashAmount);
+            if (success) {
+                BuyTrashEvent(fromIndex, hash, now, msg.sender, receiver, amount, tokenType);
+            } else {
+                TrashEventError(now, msg.sender, receiver, tokenType);
+                throw; // back coins
+            }
+        } else {
+            TrashEventError(now, msg.sender, receiver, tokenType);
+        }
+
+
+    }
+
+    /*returns: hash, time, sender, receiver, tokenType, amount*/
+    function getTrash(uint256 index, bool toMe) returns (bytes32, uint256, address, address, string, uint) {
+    	return dispatcher.getContract("TrashRequestDAO").getTrashRequest(index, toMe);
+    }
+
+    function removeTrash(uint256 index, bool toMe, bytes32 hash) {
+    	var (hash, time, from, to, tokenType, amount) = getTrash(index, toMe);
+        if (hash != _hash) throw; // protect from double cancel
+        if (msg.sender != from && msg.sender != to) throw;
+        if (TrashToken(dispatcher.getContract("TrashToken")).transfer(from, amount)) { // send back
+            dispatcher.getContract("DataStorage").removeTrashRequest(index, toMe, hash);
+            if (toMe) {
+                DealCanceledByReceiver(time, from, to, amount, tokenType);
+            } else {
+                DealCanceledBySender(time, from, to, amount, tokenType);
+            }
+        } else {
+            CancelError(time, from, to, amount, tokenType);
+        }
+
+    }
+
+    function trashCount(bool toMe) returns (uint) {
+    	return dispatcher.getContract("TrashRequestDAO").getTrashRequestsCount(toMe);
+    }
+
+    function() payable {
+        if (msg.sender != owner) throw;
+    }
 }
