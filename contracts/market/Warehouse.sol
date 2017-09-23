@@ -52,30 +52,30 @@ contract Warehouse is Owned, Destroyable {
     	if(trashAmount == 0) throw;
     	TrashToken token;
     	if(tokenType == "GT") {
-    		token = TrashToken(dispatcher.getContract("GlassToken");
+    		token = TrashToken(dispatcher.getContract("GlassToken"));
     	} else if(tokenType == "BT") {
-    		token = TrashToken(dispatcher.getContract("BatteriesToken");
+    		token = TrashToken(dispatcher.getContract("BatteriesToken"));
     	} else if(tokenType == "CT") {
-    		token = TrashToken(dispatcher.getContract("CeramicsToken");
+    		token = TrashToken(dispatcher.getContract("CeramicsToken"));
     	} else if(tokenType == "ChT") {
-    		token = TrashToken(dispatcher.getContract("ChemicalsToken");
+    		token = TrashToken(dispatcher.getContract("ChemicalsToken"));
     	} else if(tokenType == "MT") {
-    		token = TrashToken(dispatcher.getContract("MetalToken");
+    		token = TrashToken(dispatcher.getContract("MetalToken"));
     	} else if(tokenType == "MxT") {
-    		token = TrashToken(dispatcher.getContract("MixedToken");
+    		token = TrashToken(dispatcher.getContract("MixedToken"));
     	} else if(tokenType == "OT") {
-    		token = TrashToken(dispatcher.getContract("OrganicalToken");
+    		token = TrashToken(dispatcher.getContract("OrganicalToken"));
     	} else if(tokenType == "PT") {
-    		token = TrashToken(dispatcher.getContract("PaperToken");
+    		token = TrashToken(dispatcher.getContract("PaperToken"));
     	} else if(tokenType == "PlT") {
-    		token = TrashToken(dispatcher.getContract("PlasticToken");
+    		token = TrashToken(dispatcher.getContract("PlasticToken"));
     	} else if(tokenType == "TT") {
-    		token = TrashToken(dispatcher.getContract("TextilesToken");
-    	}
+    		token = TrashToken(dispatcher.getContract("TextilesToken"));
+    	} 
 
 
     	//TODO: update event params
-    	if(token.transferFrom(msg.sender, address(this), amount))) {
+    	if(token.transferFrom(msg.sender, address(this), amount)) {
     		var (success, fromIndex, hash) = dispatcher.getContract("DataStorage")
     		.addTrashRequest(now, msg.sender, receiver, trashAmount);
             if (success) {
