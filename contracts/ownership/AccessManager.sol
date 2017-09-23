@@ -18,18 +18,8 @@ contract AccessManager is Owned {
         dispatcher = Dispatcher(dispatcherAddress);
     }
 
-    function checkCoinEmissionAccess(address _address) constant returns (bool) {
-        if (_address == 0x0) return false;
-        return _address == dispatcher.getContract("CoinGenerator");
-    }
-
-    function checkCoinTransferAccess(address _address) constant returns (bool) {
-        if (_address == 0x0) return false;
-        return _address == dispatcher.getContract("SellOffer");
-    }
-
     function checkStorageAccess(address _address) constant returns (bool) {
         if (_address == 0x0) return false;
-        return _address == dispatcher.getContract("CoinGenerator") || _address == dispatcher.getContract("SellOffer");
+        return _address == dispatcher.getContract("Warehouse");
     }
 }
