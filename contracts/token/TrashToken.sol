@@ -12,4 +12,19 @@ contract TrashToken is Token {
 	mesurements = _mesurements;
 	danger = _danger;
     }
+
+    function emission(uint _value) {
+        // Overflow check
+        if (_value + totalSupply < totalSupply) throw;
+
+        totalSupply     += _value;
+        balances[msg.sender] += _value;
+    }
+
+    function burn(uint _value) {
+        if (balances[msg.sender] >= _value) {
+            balances[msg.sender] -= _value;
+            totalSupply      -= _value;
+        }
+    }
 }
