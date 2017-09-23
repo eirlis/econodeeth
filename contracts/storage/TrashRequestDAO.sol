@@ -8,7 +8,7 @@ library TrashRequestDAO {
         return 1;
     }
 
-    function getTrashRequestsCount(address _storageContract) constant returns (uint256) {
+    function getTrashRequestsCount(address _storageContract, bool toMe) constant returns (uint256) {
         if (_storageContract == 0x0) throw;
         return DataStorage(_storageContract).getUIntValue(sha3("TrashRequestCount"));
     }
