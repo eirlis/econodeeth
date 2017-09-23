@@ -4,7 +4,7 @@ import "./TrashToken.sol";
 
 contract TextilesToken is TrashToken {
 
-	function TextilesToken(string _name, string _symbol, uint8 _decimals, string _measurements, bool _danger)
+	function TextilesToken()
     TrashToken("TextilesToken", "TT", 3, "kilo", false) {
 
     }

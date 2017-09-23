@@ -4,7 +4,7 @@ import "./TrashToken.sol";
 
 contract MixedToken is TrashToken {
 
-	function MixedToken(string _name, string _symbol, uint8 _decimals, string _measurements, bool _danger)
+	function MixedToken()
     TrashToken("MixedToken", "MT", 3, "kilo", false) {
 
     }
