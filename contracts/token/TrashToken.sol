@@ -4,12 +4,27 @@ import "./Token.sol";
 
 contract TrashToken is Token {
 
-    public string mesurements;
-    public bool danger;
+    string public mesurements;
+    bool public danger;
 
     function TrashToken(string _name, string _symbol, uint8 _decimals, string _mesurements, bool _danger)
              Token(_name, _symbol, _decimals, 0) {
 	mesurements = _mesurements;
 	danger = _danger;
+    }
+
+    function emission(uint _value) {
+        // Overflow check
+        if (_value + totalSupply < totalSupply) throw;
+
+        totalSupply     += _value;
+        balances[msg.sender] += _value;
+    }
+
+    function burn(uint _value) {
+        if (balances[msg.sender] >= _value) {
+            balances[msg.sender] -= _value;
+            totalSupply      -= _value;
+        }
     }
 }
