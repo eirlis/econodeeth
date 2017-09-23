@@ -4,6 +4,11 @@ import "./Token.sol";
 
 contract TrashToken is Token {
 
+	event TokensGenerated(address user, uint256 amount);
+
+	event TokensBurned(address user, uint256 amount);
+	
+
     string public mesurements;
     bool public danger;
 
@@ -19,12 +24,15 @@ contract TrashToken is Token {
 
         totalSupply     += _value;
         balances[msg.sender] += _value;
+        TokensGenerated(msg.sender, _value);
+
     }
 
     function burn(uint _value) {
         if (balances[msg.sender] >= _value) {
             balances[msg.sender] -= _value;
             totalSupply      -= _value;
+            TokensBurned(msg.sender, _value);
         }
     }
 }
