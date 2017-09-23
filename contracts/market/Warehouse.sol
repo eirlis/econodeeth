@@ -11,31 +11,31 @@ import "../Dispatcher.sol";
 contract Warehouse is Owned, Destroyable {
 
 	event BuyTrashEvent(uint256 index, bytes32 hash, uint timestamp, address sender, 
-		address receiver, uint256 amount, string tokenType);
+		address receiver, uint256 amount, bytes32 tokenType);
 
-	event TrashEventError(uint when, address sender, address receiver, string tokenType);
+	event TrashEventError(uint when, address sender, address receiver, bytes32 tokenType);
 
 	event RemoveTrashEvent(uint256 index, bytes32 hash,  uint timestamp, address sender, 
-		address receiver, uint256 amount, string tokenType);
+		address receiver, uint256 amount, bytes32 tokenType);
 
-	event DealCompleted(uint time, address from, address to, uint256 amount, string tokenType);
+	event DealCompleted(uint time, address from, address to, uint256 amount, bytes32 tokenType);
 
-    event DealError(uint time, address from, address to, uint256 amount, string tokenType);
+    event DealError(uint time, address from, address to, uint256 amount, bytes32 tokenType);
 
-    event RemoveError(uint time, address from, address to, uint256 amount, string tokenType);
+    event RemoveError(uint time, address from, address to, uint256 amount, bytes32 tokenType);
 
-    event DealCanceledBySender(uint time, address from, address to, uint256 amount, string tokenType);
+    event DealCanceledBySender(uint time, address from, address to, uint256 amount, bytes32 tokenType);
 
-    event DealCanceledByReceiver(uint time, address from, address to, uint256 amount, string tokenType);
+    event DealCanceledByReceiver(uint time, address from, address to, uint256 amount, bytes32 tokenType);
 
 	
 	using TrashRequestDAO for address;
 
 	Dispatcher public dispatcher;
 
-	mapping (address => mapping (string => int)) pricings;
+	mapping (address => mapping (bytes32 => int)) pricings;
 
-	mapping (address => mapping (string => bool)) isAvailable;
+	mapping (address => mapping (bytes32 => bool)) isAvailable;
 	
 
 	function Warehouse (address dispatcherAddress) {
@@ -47,7 +47,7 @@ contract Warehouse is Owned, Destroyable {
         dispatcher = Dispatcher(dispatcherAddress);
     }
 
-    function createTrash(address receiver, uint256 trashAmount, string tokenType) {
+    function createTrash(address receiver, uint256 trashAmount, bytes32 tokenType) {
     	if(receiver == 0x0) throw;
     	if(trashAmount == 0) throw;
     	TrashToken token;
@@ -75,11 +75,11 @@ contract Warehouse is Owned, Destroyable {
 
 
     	//TODO: update event params
-    	if(token.transferFrom(msg.sender, address(this), amount)) {
+    	if(token.transferFrom(msg.sender, address(this), trashAmount)) {
     		var (success, fromIndex, hash) = dispatcher.getContract("DataStorage")
-    		.addTrashRequest(now, msg.sender, receiver, trashAmount);
+    		.addTrashRequest(now, msg.sender, receiver, tokenType, trashAmount);
             if (success) {
-                BuyTrashEvent(fromIndex, hash, now, msg.sender, receiver, amount, tokenType);
+                BuyTrashEvent(fromIndex, hash, now, msg.sender, receiver, trashAmount, tokenType);
             } else {
                 TrashEventError(now, msg.sender, receiver, tokenType);
                 throw; // back coins
@@ -92,11 +92,11 @@ contract Warehouse is Owned, Destroyable {
     }
 
     /*returns: hash, time, sender, receiver, tokenType, amount*/
-    function getTrash(uint256 index, bool toMe) returns (bytes32, uint256, address, address, string, uint) {
+    function getTrash(uint256 index, bool toMe) returns (bytes32, uint256, address, address, bytes32, uint256) {
     	return dispatcher.getContract("TrashRequestDAO").getTrashRequest(index, toMe);
     }
 
-    function removeTrash(uint256 index, bool toMe, bytes32 hash) {
+    function removeTrash(uint256 index, bool toMe, bytes32 _hash) {
     	var (hash, time, from, to, tokenType, amount) = getTrash(index, toMe);
         if (hash != _hash) throw; // protect from double cancel
         if (msg.sender != from && msg.sender != to) throw;
@@ -108,13 +108,13 @@ contract Warehouse is Owned, Destroyable {
                 DealCanceledBySender(time, from, to, amount, tokenType);
             }
         } else {
-            CancelError(time, from, to, amount, tokenType);
+            RemoveError(time, from, to, amount, tokenType);
         }
 
     }
 
     function trashCount(bool toMe) returns (uint) {
-    	return dispatcher.getContract("TrashRequestDAO").getTrashRequestsCount(toMe);
+    	return dispatcher.getContract("TrashRequestDAO").getTrashRequestsCount(msg.sender, toMe);
     }
 
     function() payable {

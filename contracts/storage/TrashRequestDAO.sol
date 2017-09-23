@@ -23,7 +23,7 @@ library TrashRequestDAO {
 	}
     }
 
-    function addTrashRequest(address _storageContract, uint time, address sender, address receiver, string trashType, uint256 amount) returns (bool success, uint256 index, bytes32 hash) {
+    function addTrashRequest(address _storageContract, uint time, address sender, address receiver, bytes32 trashType, uint256 amount) returns (bool success, uint256 fromIndex, bytes32 hash) {
         if (_storageContract == 0x0) throw;
         if (time == 0) throw;
 	if (sender == 0x0) throw;
@@ -73,23 +73,23 @@ library TrashRequestDAO {
         DataStorage(_storageContract).setUIntValue(sha3("TrashRequestToIndex", to), toIndex);
     }
 
-    function setTrashRequest(address _storageContract, bytes32 hash, uint time, address sender, address receiver, string trashType, uint256 amount, uint256 fromIndex, uint256 toIndex) private {
+    function setTrashRequest(address _storageContract, bytes32 hash, uint time, address sender, address receiver, bytes32 trashType, uint256 amount, uint256 fromIndex, uint256 toIndex) private {
         DataStorage(_storageContract).setUIntValue(sha3("trash_request_time", hash), time);
 	DataStorage(_storageContract).setAddressValue(sha3("trash_request_sender", hash), sender);
         DataStorage(_storageContract).setAddressValue(sha3("trash_request_receiver", hash), receiver);
-        DataStorage(_storageContract).setStringValue(sha3("trash_request_type", hash), trashType);
+        DataStorage(_storageContract).setBytes32Value(sha3("trash_request_type", hash), trashType);
         DataStorage(_storageContract).setUIntValue(sha3("trash_request_amount", hash), amount);
 	DataStorage(_storageContract).setUIntValue(sha3("trash_request_from_index", hash), fromIndex);
         DataStorage(_storageContract).setUIntValue(sha3("trash_request_to_index", hash), toIndex);
     }
 
-    function getTrashRequest(address _storageContract, uint256 _id, bool toMe) constant returns (bytes32 hash, uint time, address sender, address receiver, string trashType, uint256 amount) {
+    function getTrashRequest(address _storageContract, uint256 _id, bool toMe) constant returns (bytes32 hash, uint time, address sender, address receiver, bytes32 trashType, uint256 amount) {
         if (_storageContract == 0x0) throw;
         hash = getTrashRequestHashIndex(_storageContract, _id, toMe);
         time = DataStorage(_storageContract).getUIntValue(sha3("trash_request_time", hash));
 	sender = DataStorage(_storageContract).getAddressValue(sha3("trash_request_sender", hash));
         receiver = DataStorage(_storageContract).getAddressValue(sha3("trash_request_receiver", hash));
-        trashType = DataStorage(_storageContract).getStringValue(sha3("trash_request_type", hash));
+        trashType = DataStorage(_storageContract).getBytes32Value(sha3("trash_request_type", hash));
         amount = DataStorage(_storageContract).getUIntValue(sha3("trash_request_amount", hash));
     }
 
@@ -97,7 +97,7 @@ library TrashRequestDAO {
         DataStorage(_storageContract).deleteUIntValue(sha3("trash_request_time", hash));
 	DataStorage(_storageContract).deleteAddressValue(sha3("trash_request_sender", hash));
         DataStorage(_storageContract).deleteAddressValue(sha3("trash_request_receiver", hash));
-        DataStorage(_storageContract).deleteStringValue(sha3("trash_request_type", hash));
+        DataStorage(_storageContract).deleteBytes32Value(sha3("trash_request_type", hash));
         DataStorage(_storageContract).deleteUIntValue(sha3("trash_request_amount", hash));
 	DataStorage(_storageContract).deleteUIntValue(sha3("trash_request_from_index", hash));
 	DataStorage(_storageContract).deleteUIntValue(sha3("trash_request_to_index", hash));
