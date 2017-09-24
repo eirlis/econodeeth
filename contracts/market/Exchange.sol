@@ -1,7 +1,7 @@
 pragma solidity ^0.4.11;
 
 import "../ownership/Owned.sol";
-import "../ownership/Destroyable.sol"
+import "../ownership/Destroyable.sol";
 import "../Dispatcher.sol";
 import "../token/EcoCoin.sol";
 
