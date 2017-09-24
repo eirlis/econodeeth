@@ -34,7 +34,7 @@ contract Warehouse is Owned, Destroyable {
     }
 
     function setPrice(bytes32 trashType, int price, bool available) {
-	pricing[msg.sender][trashType] = price;
+	pricings[msg.sender][trashType] = price;
 	isAvailable[msg.sender][trashType] = available;
     }
 
@@ -84,7 +84,7 @@ contract Warehouse is Owned, Destroyable {
     }
 
     function removeTrashRequest(uint256 index, bool toMe, bytes32 _hash) {
-    	var (hash, time, from, to, tokenType, amount) = getTrash(index, toMe);
+    	var (hash, time, from, to, tokenType, amount) = getTrashRequest(index, toMe);
         if (hash != _hash) throw; // protect from double cancel
         if (msg.sender != from && msg.sender != to) throw;
         if (TrashToken(dispatcher.getContract("TrashToken")).transfer(from, amount)) { // send back
