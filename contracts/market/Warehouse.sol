@@ -5,6 +5,7 @@ import "../ownership/Destroyable.sol";
 import "../storage/DataStorage.sol";
 import "../storage/TrashRequestDAO.sol";
 import "../token/TrashToken.sol";
+import "../token/EcoCoin.sol";
 import "../Dispatcher.sol";
 
 contract Warehouse is Owned, Destroyable {
@@ -113,10 +114,10 @@ contract Warehouse is Owned, Destroyable {
 	if (!isAvailable[msg.sender][tokenType]) {
 		throw;
 	}
-	uint cost = pricing[msg.sender][tokenType];
+	uint cost = uint(pricings[msg.sender][tokenType]);
         if (token.transfer(msg.sender, amount)) {
             dispatcher.getContract("DataStorage").removeTrashRequest(index, true, hash);
-	    if (dispatcher.getContract("EcoCoin").transferFrom(msg.sender, from, amount * cost)) {
+	    if (EcoCoin(dispatcher.getContract("EcoCoin")).transferFrom(msg.sender, from, amount * cost)) {
             	DealCompleted(time, from, to, amount, tokenType);
 	    } else {
 		DealError(time, from, to, amount, tokenType);
