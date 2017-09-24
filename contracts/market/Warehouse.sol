@@ -38,7 +38,7 @@ contract Warehouse is Owned, Destroyable {
 	mapping (address => mapping (bytes32 => bool)) isAvailable;
 	
 
-	function Warehouse (address dispatcherAddress) {
+	function Warehouse(address dispatcherAddress) {
 		setDispatcher(dispatcherAddress);
 	}
 
