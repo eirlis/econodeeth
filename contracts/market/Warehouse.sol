@@ -83,6 +83,51 @@ contract Warehouse is Owned, Destroyable {
     	return dispatcher.getContract("TrashRequestDAO").getTrashRequest(index, toMe);
     }
 
+    function apply(uint index, bytes32 _hash) {
+	var (hash, time, from, to, tokenType, amount) = getTrashRequest(index, true);
+        if (hash != _hash) throw; // protect from double buy
+        if (msg.sender != to) throw;
+	TrashToken token;
+	if(tokenType == "GT") {
+                token = TrashToken(dispatcher.getContract("GlassToken"));
+        } else if(tokenType == "BT") {
+                token = TrashToken(dispatcher.getContract("BatteriesToken"));
+        } else if(tokenType == "CT") {
+                token = TrashToken(dispatcher.getContract("CeramicsToken"));
+        } else if(tokenType == "ChT") {
+                token = TrashToken(dispatcher.getContract("ChemicalsToken"));
+        } else if(tokenType == "MT") {
+                token = TrashToken(dispatcher.getContract("MetalToken"));
+        } else if(tokenType == "MxT") {
+                token = TrashToken(dispatcher.getContract("MixedToken"));
+        } else if(tokenType == "OT") {
+                token = TrashToken(dispatcher.getContract("OrganicalToken"));
+        } else if(tokenType == "PT") {
+                token = TrashToken(dispatcher.getContract("PaperToken"));
+        } else if(tokenType == "PlT") {
+                token = TrashToken(dispatcher.getContract("PlasticToken"));
+        } else if(tokenType == "TT") {
+                token = TrashToken(dispatcher.getContract("TextilesToken"));
+        }
+
+	if (!isAvailable[msg.sender][tokenType]) {
+		throw;
+	}
+	uint cost = pricing[msg.sender][tokenType];
+        if (token.transfer(msg.sender, amount)) {
+            dispatcher.getContract("DataStorage").removeTrashRequest(index, true, hash);
+	    if (dispatcher.getContract("EcoCoin").transferFrom(msg.sender, from, amount * cost)) {
+            	DealCompleted(time, from, to, amount, tokenType);
+	    } else {
+		DealError(time, from, to, amount, tokenType);
+		throw; // back trash
+	    }
+        } else {
+            DealError(time, from, to, amount, tokenType);
+        }
+
+    }
+
     function removeTrashRequest(uint256 index, bool toMe, bytes32 _hash) {
     	var (hash, time, from, to, tokenType, amount) = getTrashRequest(index, toMe);
         if (hash != _hash) throw; // protect from double cancel
